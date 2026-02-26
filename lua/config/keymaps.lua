@@ -15,8 +15,8 @@ vim.keymap.set("t", "<Esc>", "<C-\\><C-N>", {
 -- =====================================================================
 keymap("n", "<leader>r", function()
   -- 1. Check filetype
-  if vim.bo.filetype ~= "c" then
-    print("not a C file. Aborting")
+  if vim.bo.filetype ~= "c" or vim.bo.filetype ~= "cpp" then
+    print("not a C/C++ file. Aborting")
     return
   end
 
@@ -29,10 +29,17 @@ keymap("n", "<leader>r", function()
   -- 3. Save the current file first
   vim.cmd("write")
 
+  if vim.bo.filetype == "c" then
+    CC = "gcc"
+  end
+  if vim.bo.filetype == "cpp" then
+    CC = "g++"
+  end
   -- 4. Set 'makeprg' to our gcc command and run :make
   --    string.format inserts our filenames safely into the command string
   vim.opt.makeprg = string.format(
-    "gcc -Wall %s -o %s",
+    "%s -Wall %s -o %s",
+    CC,
     vim.fn.shellescape(filename_full_path), -- Use full path for compiler
     vim.fn.shellescape(output_name) -- Use local path for output
   )
@@ -70,7 +77,7 @@ keymap("n", "<leader>r", function()
       vim.keymap.set("t", "<Esc>", "<Cmd>close<CR><Cmd>bdelete! " .. t.bufnr .. "<CR>", {
         buffer = t.bufnr,
         silent = true,
-        desc = "Close ToggleTerm",
+        -- desc = "Close ToggleTerm",
       })
     end,
     auto_scroll = true, -- Keep scrolled to the bottom
