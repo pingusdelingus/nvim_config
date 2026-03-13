@@ -158,6 +158,8 @@ local function runRuby(filename_full_path)
   term_to_run:toggle()
 end
 
+local function runGo(filename_full_path) end
+
 keymap("n", "<leader>r", function()
   local filename_full_path = vim.fn.expand("%:p")
   local output_name = "./" .. vim.fn.expand("%:t:r") .. ".exe"
@@ -172,6 +174,8 @@ keymap("n", "<leader>r", function()
     runCCPP(filename_full_path, output_name, CC)
   elseif filetype == "ruby" then
     runRuby(filename_full_path)
+  elseif filetype == "go" then
+    runGo(filename_full_path)
   else
     print("Unsupported filetype: " .. filetype)
   end

@@ -1,3 +1,6 @@
 -- bootstrap lazy.nvim, LazyVim and your plugins
 require("config.lazy")
-require("config.autocompile")
+
+-- changed to compile.nvim
+-- require("config.autocompile")
+require("oil").setup()
