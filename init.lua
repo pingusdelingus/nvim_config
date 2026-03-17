@@ -2,5 +2,5 @@
 require("config.lazy")
 
 -- changed to compile.nvim
--- require("config.autocompile")
+require("config.autocompile")
 require("oil").setup()

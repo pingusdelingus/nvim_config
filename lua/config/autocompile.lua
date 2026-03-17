@@ -158,6 +158,30 @@ local function runRuby(filename_full_path)
   term_to_run:toggle()
 end
 
+local function runGeneric(filename_full_path, run_cmd)
+  local status_ok, terminal_module = get_toggleterm()
+  if not status_ok then
+    return
+  end
+  local comp_cmd = string.format("%s ", run_cmd)
+  local term_to_run = terminal_module.Terminal:new({
+    cmd = comp_cmd,
+    dir = vim.fn.fnamemodify(filename_full_path, ":h"),
+    direction = "horizontal",
+    focus = true,
+    close_on_exit = false,
+    on_open = function(t)
+      vim.keymap.set(
+        "t",
+        "<Esc>",
+        "<Cmd>close<CR><Cmd>bdelete! " .. t.bufnr .. "<CR>",
+        { buffer = t.bufnr, silent = true }
+      )
+    end,
+  })
+  term_to_run:toggle()
+end
+
 local function runGo(filename_full_path) end
 
 keymap("n", "<leader>r", function()
@@ -176,6 +200,8 @@ keymap("n", "<leader>r", function()
     runRuby(filename_full_path)
   elseif filetype == "go" then
     runGo(filename_full_path)
+  elseif filetype == "perl" then
+    runGeneric(filename_full_path, "perl")
   else
     print("Unsupported filetype: " .. filetype)
   end
