@@ -356,17 +356,37 @@ _G.compile_stack = _G.compile_stack or {}
 
 local function run_new_compile()
   -- Default prompt value - adjust this to your typical g++ or make command
+  local filename_full_path = vim.fn.expand("%:p")
+  local filename_root = vim.fn.expand("%:p:r") -- Full path without extension
   local default_cmd = ""
+  local filetype = vim.bo.filetype
   local last_cmd = _G.compile_stack[#_G.compile_stack]
   if last_cmd then
     default_cmd = last_cmd
   else
-    default_cmd = "make -j"
+    if filetype == "c" then
+      -- %s -> full path, %r -> executable name (path without extension)
+      default_cmd = string.format(
+        "gcc %s -o %s && %s",
+        vim.fn.shellescape(filename_full_path),
+        vim.fn.shellescape(filename_root),
+        vim.fn.shellescape(filename_root)
+      )
+    elseif filetype == "cpp" then
+      default_cmd = string.format(
+        "g++ %s -o %s && %s",
+        vim.fn.shellescape(filename_full_path),
+        vim.fn.shellescape(filename_root),
+        vim.fn.shellescape(filename_root)
+      )
+    elseif filetype == "python" then
+      default_cmd = string.format("python3 %s", vim.fn.shellescape(filename_full_path))
+    else
+      default_cmd = "make -j"
+    end
   end
-  local filename_full_path = vim.fn.expand("%:p")
 
   local output_name = "./" .. vim.fn.expand("%:t:r") .. ".exe"
-  local filetype = vim.bo.filetype
 
   vim.cmd("write")
 
