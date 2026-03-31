@@ -349,6 +349,28 @@ end
 --  term_to_run:toggle()
 --end
 
+local function run_new_compile_blank()
+  -- Default prompt value - adjust this to your typical g++ or make command
+  local filename_full_path = vim.fn.expand("%:p")
+  local filename_root = vim.fn.expand("%:p:r") -- Full path without extension
+  local default_cmd = ""
+  local filetype = vim.bo.filetype
+
+  local output_name = "./" .. vim.fn.expand("%:t:r") .. ".exe"
+
+  vim.cmd("write")
+
+  vim.ui.input({
+    prompt = "Compile Command: ",
+    default = default_cmd,
+  }, function(input)
+    if input and input ~= "" then
+      table.insert(_G.compile_stack, input)
+      runGeneric(filename_full_path, input)
+    end
+  end)
+end
+
 local function runGo(filename_full_path) end
 
 -- Global or local table to hold your command history
@@ -366,19 +388,29 @@ local function run_new_compile()
   else
     if filetype == "c" then
       -- %s -> full path, %r -> executable name (path without extension)
-      default_cmd = string.format(
-        "gcc %s -o %s && %s",
-        vim.fn.shellescape(filename_full_path),
-        vim.fn.shellescape(filename_root),
-        vim.fn.shellescape(filename_root)
-      )
+      local make_dir, make_path = checkForMakefile()
+      if make_path then
+        default_cmd = string.format("make -j && %s", vim.fn.shellescape(filename_root))
+      else
+        default_cmd = string.format(
+          "gcc %s -o %s && %s",
+          vim.fn.shellescape(filename_full_path),
+          vim.fn.shellescape(filename_root),
+          vim.fn.shellescape(filename_root)
+        )
+      end
     elseif filetype == "cpp" then
-      default_cmd = string.format(
-        "g++ %s -o %s && %s",
-        vim.fn.shellescape(filename_full_path),
-        vim.fn.shellescape(filename_root),
-        vim.fn.shellescape(filename_root)
-      )
+      local make_dir, make_path = checkForMakefile()
+      if make_path then
+        default_cmd = string.format("make -j && %s", vim.fn.shellescape(filename_root))
+      else
+        default_cmd = string.format(
+          "g++ %s -o %s && %s",
+          vim.fn.shellescape(filename_full_path),
+          vim.fn.shellescape(filename_root),
+          vim.fn.shellescape(filename_root)
+        )
+      end
     elseif filetype == "python" then
       default_cmd = string.format("python3 %s", vim.fn.shellescape(filename_full_path))
     else
@@ -417,6 +449,7 @@ local function run_last_compile()
   end
 end
 
+vim.keymap.set("n", "<leader>ce", run_new_compile_blank, { desc = "e-compile blank" })
 vim.keymap.set("n", "<leader>cc", run_new_compile, { desc = "e-compile" })
 vim.keymap.set("n", "<leader>cC", run_last_compile, { desc = "run last e-compile" })
 local wk = require("which-key")
