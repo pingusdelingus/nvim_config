@@ -32,3 +32,8 @@ vim.api.nvim_create_autocmd("CursorMoved", {
     end
   end,
 })
+
+
+vim.keymap.set("n", "<leader>cy", "<cmd>MarkdownPreview<cr>", {
+  desc = "Markdown Preview",
+})
