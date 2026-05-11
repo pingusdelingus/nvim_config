@@ -29,7 +29,11 @@ return {
 
     -- 4. Show hidden files by default
     view_options = {
+      natural_order = "fast",
       show_hidden = true,
+      highlight_filename = function(entry, is_hidden, is_link_target, is_link_orphan)
+        return nil
+      end,
     },
 
     -- 5. THE FLOATING WINDOW SETUP
@@ -45,10 +49,15 @@ return {
 
     -- 6. Essential Keymaps inside the Oil buffer
     keymaps = {
-      ["<C-c>"] = "actions.close",
+      ["q"] = "actions.close",
       ["<CR>"] = "actions.select",
       ["<C-p>"] = "actions.preview",
+      ["`"] = { "actions.cd", mode = "n" },
       ["-"] = "actions.parent",
+      ["_"] = { "actions.open_cwd", mode = "n" },
+      ["g."] = { "actions.toggle_hidden", mode = "n" },
+      ["gx"] = "actions.open_external",
     },
+    use_default_keymaps = false,
   },
 }
